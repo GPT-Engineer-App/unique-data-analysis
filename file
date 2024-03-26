@@ -1,0 +1,146 @@
+import React, { useState } from "react";
+import { Box, Button, Container, FormControl, FormLabel, Heading, Input, useToast, VStack, Text } from "@chakra-ui/react";
+import { FaSignInAlt, FaUserPlus } from "react-icons/fa";
+
+const Index = () => {
+  const toast = useToast();
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const formData = new FormData(event.target);
+    const loginDetails = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
+
+    try {
+      const response = await fetch("https://backengine-6mrd.fly.dev/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginDetails),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsSignedIn(true);
+        toast({
+          title: "Login Successful",
+          description: "You have successfully logged in.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Login Failed",
+          description: errorData.error,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Network Error",
+        description: "Unable to connect to the server.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSignUp = async (event) => {
+    event.preventDefault();
+    setIsLoading(true);
+    const formData = new FormData(event.target);
+    const signUpDetails = {
+      email: formData.get("email"),
+      password: formData.get("password"),
+    };
+
+    try {
+      const response = await fetch("https://backengine-6mrd.fly.dev/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(signUpDetails),
+      });
+
+      if (response.status === 204) {
+        toast({
+          title: "Signup Successful",
+          description: "You have successfully signed up.",
+          status: "success",
+          duration: 5000,
+          isClosable: true,
+        });
+      } else {
+        const errorData = await response.json();
+        toast({
+          title: "Signup Failed",
+          description: errorData.error,
+          status: "error",
+          duration: 5000,
+          isClosable: true,
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Network Error",
+        description: "Unable to connect to the server.",
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Container centerContent>
+      <VStack spacing={8} marginY={10}>
+        <Heading>Welcome to the Interactive API</Heading>
+        {!isSignedIn ? (
+          <>
+            <FormControl as="form" onSubmit={handleLogin}>
+              <VStack spacing={4}>
+                <Input name="email" type="email" placeholder="Email" required />
+                <Input name="password" type="password" placeholder="Password" required />
+                <Button leftIcon={<FaSignInAlt />} colorScheme="teal" isLoading={isLoading} type="submit">
+                  Login
+                </Button>
+              </VStack>
+            </FormControl>
+            <Text>or</Text>
+            <FormControl as="form" onSubmit={handleSignUp}>
+              <VStack spacing={4}>
+                <Input name="email" type="email" placeholder="Email" required />
+                <Input name="password" type="password" placeholder="Password" required />
+                <Button leftIcon={<FaUserPlus />} colorScheme="blue" isLoading={isLoading} type="submit">
+                  Sign Up
+                </Button>
+              </VStack>
+            </FormControl>
+          </>
+        ) : (
+          <Box>
+            <Text>You are logged in!</Text>
+          </Box>
+        )}
+      </VStack>
+    </Container>
+  );
+};
+
+export default Index;
